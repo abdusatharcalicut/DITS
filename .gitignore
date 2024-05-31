@@ -1,0 +1,70 @@
+# Miscellaneous
+*.lock
+*.log
+*.tmp
+*.swp
+*.swo
+*.DS_Store
+
+# Flutter specific
+.dart_tool/
+.build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter/
+.packages
+.pub-cache/
+.pub/
+.idea/
+vscode/
+android/.gradle/
+android/app/build/
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+linux/flutter/ephemeral/
+macos/Flutter/ephemeral/
+windows/flutter/ephemeral/
+web/flutter/ephemeral/
+coverage/
+build/
+*.iml
+.dart_tool/
+android/key.properties
+
+# Web specific
+web/.dart_tool/
+web/manifest.json
+
+# Symbolic links
+symlinks/
+
+# Intellij related
+*.iml
+.idea/
+
+# VS Code related
+.vscode/
+
+# macOS
+.DS_Store
+
+# Android Studio
+*.iml
+.idea/
+.gradle
+/local.properties
+/captures/
+android/.gradle
+android/.idea
+android/app/build
+
+# Firebase
+ios/Runner/GoogleService-Info.plist
+android/app/google-services.json
+
+# Generated files
+pubspec.lock
