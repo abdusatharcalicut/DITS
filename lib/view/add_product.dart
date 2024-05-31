@@ -32,6 +32,14 @@ class _AddProductState extends State<AddProduct> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
+          title: Text(
+              'Add Products',
+              style: TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+                color: AppThemes.primaryColorDark,
+              ),
+            ),
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
@@ -46,15 +54,7 @@ class _AddProductState extends State<AddProduct> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            Text(
-              'Add Products',
-              style: TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
-                color: AppThemes.primaryColorDark,
-              ),
-            ),
-              SizedBox(height: 20.0),
+              SizedBox(height: 10.0),
               TextField(
                 controller: _productNameController,
                 decoration: InputDecoration(
@@ -216,11 +216,12 @@ class _AddProductState extends State<AddProduct> {
       setState(() {
         _products.add(product);
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Product added to Offline: ${product.productName}'),
-        ),
-      );
+      // ignore: use_build_context_synchronously
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Product added Successfully'),
+      //   ),
+      // );
       _productNameController.clear();
       _purchasePriceController.clear();
       _salePriceController.clear();

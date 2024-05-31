@@ -44,6 +44,7 @@ class _LoginPageState extends State<LoginPage> {
     String password = _passwordController.text;
     bool isAuthenticated = await authenticateUser(mobileNumber, password);
       if (isAuthenticated) {
+        // ignore: use_build_context_synchronously
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => const HomePage()));
       }

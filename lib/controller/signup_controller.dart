@@ -15,6 +15,7 @@ Future<bool> adduserToBox(BuildContext context, User user) async {
 
     if (userExists) {
       // User already exists
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('User already exists!'),
@@ -24,6 +25,7 @@ Future<bool> adduserToBox(BuildContext context, User user) async {
       // User doesn't exist, add it to the box
       await box.add(user);
       status = true;
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Sign-up Successfully Please login'),

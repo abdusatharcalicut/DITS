@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dits/view/add_product.dart';
 import 'package:flutter/material.dart';
 import 'package:dits/themes/app_themes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class product extends StatefulWidget {
   const product({Key? key});
@@ -12,13 +13,26 @@ class product extends StatefulWidget {
 
 class productState extends State<product> {
   TextEditingController _searchController = TextEditingController();
-  final CollectionReference items =
-      FirebaseFirestore.instance.collection('products');
+  String? mobileNumber;
+  final CollectionReference items = FirebaseFirestore.instance.collection('products');
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLogId();
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadLogId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      mobileNumber = prefs.getString('logId');
+    });
   }
 
   @override
@@ -68,109 +82,120 @@ class productState extends State<product> {
             ),
             SizedBox(height: 10.0),
             Expanded(
-              child: StreamBuilder(
-                stream: items.snapshots(),
-                builder: (context, AsyncSnapshot snapshot) {
-                  if (snapshot.hasData) {
-                    // Filter the list based on the search query
-                    final List<DocumentSnapshot> filteredProducts =
-                        snapshot.data.docs.where((doc) {
-                      final productName = doc['productName'] as String;
-                      return productName
-                          .toLowerCase()
-                          .contains(_searchController.text.toLowerCase());
-                    }).toList();
-                    return ListView.builder(
-                      itemCount: filteredProducts.length,
-                      itemBuilder: (context, index) {
-                        final DocumentSnapshot producttable =
-                            filteredProducts[index];
-                        return Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+              child: mobileNumber == null
+                  ? Center(child: CircularProgressIndicator())
+                  : StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('products')
+                          .where('uid', isEqualTo: int.parse(mobileNumber!))
+                          .snapshots(),
+                      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (snapshot.hasData) {
+                          // Filter the list based on the search query
+                          final List<DocumentSnapshot> filteredProducts =
+                              snapshot.data!.docs.where((doc) {
+                            final productName = doc['productName'] as String;
+                            return productName
+                                .toLowerCase()
+                                .contains(_searchController.text.toLowerCase());
+                          }).toList();
+                          return ListView.builder(
+                            itemCount: filteredProducts.length,
+                            itemBuilder: (context, index) {
+                              final DocumentSnapshot productTable =
+                                  filteredProducts[index];
+                              return Column(
                                 children: [
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Sale price",
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.normal),
-                                      ),
-                                      Text(
-                                        producttable['productName'].toString(),
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              AppThemes.primaryColorDark,
+                                  Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Sale price",
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.normal),
+                                            ),
+                                            Text(
+                                              productTable['productName']
+                                                  .toString(),
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppThemes
+                                                    .primaryColorDark,
+                                              ),
+                                            ),
+                                            Text(
+                                              "INR : " +
+                                                  productTable['sellingPrice']
+                                                      .toString(),
+                                              style: TextStyle(fontSize: 14),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                      Text(
-                                        "INR : " +
-                                            producttable['sellingPrice']
-                                                .toString(),
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                    ],
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Purchase Price",
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.normal),
+                                            ),
+                                            Text(
+                                              "INR : " +
+                                                  productTable['purchasePrice']
+                                                      .toString(),
+                                              style: TextStyle(fontSize: 14),
+                                            ),
+                                          ],
+                                        ),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Stock",
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.normal),
+                                            ),
+                                            Text(
+                                              productTable['openingStock']
+                                                  .toString(),
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.green),
+                                            ),
+                                            Text(
+                                              productTable['unit'].toString(),
+                                              style: TextStyle(fontSize: 14),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "purchase Price",
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.normal),
-                                      ),
-                                      Text(
-                                        "INR : " +
-                                            producttable['purchasePrice']
-                                                .toString(),
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Stock",
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.normal),
-                                      ),
-                                      Text(
-                                        producttable['openingStock'].toString(),
-                                        style: TextStyle(
-                                            fontSize: 14, color: Colors.green),
-                                      ),
-                                      Text(
-                                        producttable['unit'].toString(),
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                    ],
+                                  Divider(
+                                    thickness: 1,
+                                    color: Colors.grey[300],
                                   ),
                                 ],
-                              ),
-                            ),
-                            Divider(
-                              thickness: 1,
-                              color: Colors.grey[300],
-                            ),
-                          ],
-                        );
+                              );
+                            },
+                          );
+                        }
+                        return Center(child: CircularProgressIndicator());
                       },
-                    );
-                  }
-                  return Container();
-                },
-              ),
+                    ),
             ),
           ],
         ),

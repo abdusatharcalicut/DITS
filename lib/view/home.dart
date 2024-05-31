@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dits/themes/app_themes.dart';
 import 'package:dits/view/add_product.dart';
+import 'package:dits/view/customers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dits/view/invoice.dart';
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
     product(),
     Cashbook(),
     Invoice(),
-    Customers(),
+    customers(),
     settings(),
   ];
 
