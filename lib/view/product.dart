@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dits/controller/product_crud_controller.dart';
+import 'package:dits/model/product_model.dart';
 import 'package:dits/view/add_product.dart';
+import 'package:dits/view/product_crud.dart';
 import 'package:flutter/material.dart';
 import 'package:dits/themes/app_themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,12 +17,16 @@ class product extends StatefulWidget {
 class productState extends State<product> {
   TextEditingController _searchController = TextEditingController();
   String? mobileNumber;
-  final CollectionReference items = FirebaseFirestore.instance.collection('products');
+  final CollectionReference items =
+      FirebaseFirestore.instance.collection('products');
+  final ProductService productService = ProductService();
+  List<Product> products = [];
 
   @override
   void initState() {
     super.initState();
     _loadLogId();
+    _fetchProducts();
   }
 
   @override
@@ -32,6 +39,13 @@ class productState extends State<product> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       mobileNumber = prefs.getString('logId');
+    });
+  }
+
+  Future<void> _fetchProducts() async {
+    List<Product> fetchedProducts = await productService.getProducts();
+    setState(() {
+      products = fetchedProducts;
     });
   }
 
@@ -89,7 +103,8 @@ class productState extends State<product> {
                           .collection('products')
                           .where('uid', isEqualTo: int.parse(mobileNumber!))
                           .snapshots(),
-                      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      builder:
+                          (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                         if (snapshot.hasData) {
                           // Filter the list based on the search query
                           final List<DocumentSnapshot> filteredProducts =
@@ -104,91 +119,120 @@ class productState extends State<product> {
                             itemBuilder: (context, index) {
                               final DocumentSnapshot productTable =
                                   filteredProducts[index];
-                              return Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Sale price",
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.normal),
-                                            ),
-                                            Text(
-                                              productTable['productName']
-                                                  .toString(),
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppThemes
-                                                    .primaryColorDark,
-                                              ),
-                                            ),
-                                            Text(
-                                              "INR : " +
-                                                  productTable['sellingPrice']
-                                                      .toString(),
-                                              style: TextStyle(fontSize: 14),
-                                            ),
-                                          ],
-                                        ),
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Purchase Price",
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.normal),
-                                            ),
-                                            Text(
-                                              "INR : " +
-                                                  productTable['purchasePrice']
-                                                      .toString(),
-                                              style: TextStyle(fontSize: 14),
-                                            ),
-                                          ],
-                                        ),
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Stock",
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.normal),
-                                            ),
-                                            Text(
-                                              productTable['openingStock']
-                                                  .toString(),
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.green),
-                                            ),
-                                            Text(
-                                              productTable['unit'].toString(),
-                                              style: TextStyle(fontSize: 14),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                              return InkWell(
+                                onTap: () async {
+                                  bool? result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ProductDetail(
+                                        product: productTable,
+                                      ),
                                     ),
-                                  ),
-                                  Divider(
-                                    thickness: 1,
-                                    color: Colors.grey[300],
-                                  ),
-                                ],
+                                  );
+                                  if (result == true) {
+                                    _fetchProducts();
+                                  }
+                                },
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Sale price",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.normal),
+                                              ),
+                                              Text(
+                                                productTable['productName']
+                                                    .toString(),
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: AppThemes
+                                                      .primaryColorDark,
+                                                ),
+                                              ),
+                                              Text(
+                                                "INR : " +
+                                                    productTable['sellingPrice']
+                                                        .toString(),
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Purchase Price",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.normal),
+                                              ),
+                                              Text(
+                                                "INR : " +
+                                                    productTable[
+                                                            'purchasePrice']
+                                                        .toString(),
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Stock",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.normal),
+                                              ),
+                                              Text(
+                                                productTable['openingStock']
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.green),
+                                              ),
+                                              Text(
+                                                productTable['unit'].toString(),
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                            ],
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.delete),
+                                            onPressed: () async {
+                                              await productService
+                                                  .deleteProduct(
+                                                      productTable.id);
+                                              _fetchProducts();
+                                            },
+                                            color: Colors.red,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Divider(
+                                      thickness: 1,
+                                      color: Colors.grey[300],
+                                    ),
+                                  ],
+                                ),
                               );
                             },
                           );

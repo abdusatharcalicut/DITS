@@ -1,7 +1,7 @@
 import 'package:dits/network/network_sync_service.dart';
 import 'package:dits/model/signup_model.dart';
 import 'package:dits/network/db_connection.dart';
-import 'package:dits/model/add_product_model.dart';
+import 'package:dits/model/product_model.dart';
 import 'package:dits/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

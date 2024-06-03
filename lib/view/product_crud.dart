@@ -1,210 +1,130 @@
+import 'package:dits/controller/product_crud_controller.dart';
 import 'package:dits/themes/app_themes.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dits/model/product_model.dart';
 
-class ProductCrud extends StatefulWidget {
-  const ProductCrud({Key? key}) : super(key: key);
+class ProductDetail extends StatefulWidget {
+  final DocumentSnapshot product;
+
+  const ProductDetail({required this.product});
 
   @override
-  State<ProductCrud> createState() => _ProductCrudState();
+  _ProductDetailState createState() => _ProductDetailState();
 }
 
-class _ProductCrudState extends State<ProductCrud> {
-  TextEditingController _productNameController = TextEditingController();
-  String? _selectedUnit;
-  TextEditingController _purchasePriceController = TextEditingController();
-  TextEditingController _salePriceController = TextEditingController();
-  TextEditingController _openingStockController = TextEditingController();
+class _ProductDetailState extends State<ProductDetail> {
+  final ProductService productService = ProductService();
+  late TextEditingController productNameController;
+  late TextEditingController unitController;
+  late TextEditingController purchasePriceController;
+  late TextEditingController sellingPriceController;
+  late TextEditingController openingStockController;
+
+  @override
+  void initState() {
+    super.initState();
+    productNameController = TextEditingController(text: widget.product['productName']);
+    unitController = TextEditingController(text: widget.product['unit']);
+    purchasePriceController = TextEditingController(text: widget.product['purchasePrice'].toString());
+    sellingPriceController = TextEditingController(text: widget.product['sellingPrice'].toString());
+    openingStockController = TextEditingController(text: widget.product['openingStock'].toString());
+  }
+
+  @override
+  void dispose() {
+    productNameController.dispose();
+    unitController.dispose();
+    purchasePriceController.dispose();
+    sellingPriceController.dispose();
+    openingStockController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateProduct() async {
+    Product updatedProduct = Product(
+      productName: productNameController.text,
+      unit: unitController.text,
+      purchasePrice: double.parse(purchasePriceController.text),
+      sellingPrice: double.parse(sellingPriceController.text),
+      openingStock: int.parse(openingStockController.text),
+      uid: widget.product['uid'],
+    );
+
+    await productService.updateProduct(updatedProduct, widget.product.id);
+    Navigator.pop(context, true); // return true to indicate successful update
+  }
+
+  Future<void> _deleteProduct() async {
+    await productService.deleteProduct(widget.product.id);
+    Navigator.pop(context, true); // return true to indicate successful deletion
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Add Product',style: TextStyle(color: AppThemes.primaryColorDark,),),
-          backgroundColor: Colors.transparent, // Set background color to transparent
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+              'Product Detail',
+              style: TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+                color: AppThemes.primaryColorDark,
+              ),
+            ),
+          backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back,color: AppThemes.primaryColorDark,),
+            icon: Icon(Icons.arrow_back, color: AppThemes.primaryColorDark,),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.delete,color: Colors.red,),
-              onPressed: () {
-                // Add your delete functionality here
-                // For example, you can show a confirmation dialog
-                // and delete the product if confirmed.
-              },
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () async {
+              await _deleteProduct();
+            },
+            color: Colors.red,
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: productNameController,
+              decoration: InputDecoration(labelText: 'Product Name'),
+            ),
+            TextField(
+              controller: unitController,
+              decoration: InputDecoration(labelText: 'Unit'),
+            ),
+            TextField(
+              controller: purchasePriceController,
+              decoration: InputDecoration(labelText: 'Purchase Price'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: sellingPriceController,
+              decoration: InputDecoration(labelText: 'Selling Price'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: openingStockController,
+              decoration: InputDecoration(labelText: 'Opening Stock'),
+              keyboardType: TextInputType.number,
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _updateProduct,
+              child: Text('Update Product'),
             ),
           ],
-        ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 10.0),
-              TextField(
-                controller: _productNameController,
-                decoration: InputDecoration(
-                  labelText: 'Product Name',
-                  suffixIcon: SizedBox(
-                    width: 120, // Set the width of the dropdown button
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedUnit,
-                      items: [
-                        'No Unit',
-                        'Kg',
-                        'Gm',
-                        'Ltr',
-                        'Ml',
-                        'Mtr',
-                        'Box',
-                        'Pack',
-                        'Nos',
-                        'Piece',
-                        'Dozen',
-                        'Carton',
-                        'Can',
-                        'Bundle',
-                        'Bag',
-                        'Bottle',
-                        'Set',
-                        'Roll',
-                        'Pair',
-                        'Foot',
-                        'Sqf',
-                        'Sqm'
-                      ]
-                          .map((unit) => DropdownMenuItem(
-                                child: Text(unit),
-                                value: unit,
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedUnit = value;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: BorderSide(
-                            color: AppThemes.primaryColorDark,
-                            width: 2.0,
-                          ),
-                        ),
-                        hintText: 'Unit Type',
-                      ),
-                      elevation: 4, // adjust elevation
-                      itemHeight: 48, // adjust item height
-                    ),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(
-                      color: AppThemes.primaryColorDark,
-                      width: 2.0,
-                    ),
-                  ),
-                  hintText: 'Product Name',
-                ),
-              ),
-              SizedBox(height: 10.0),
-              TextField(
-                controller: _purchasePriceController,
-                decoration: InputDecoration(
-                  labelText: 'Purchase Price',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(
-                      color: AppThemes.primaryColorDark,
-                      width: 2.0,
-                    ),
-                  ),
-                  hintText: 'Purchase Price',
-                ),
-                onSubmitted: (value) {},
-                keyboardType: TextInputType.number,
-              ),
-              SizedBox(height: 10.0),
-              TextField(
-                controller: _salePriceController,
-                decoration: InputDecoration(
-                  labelText: 'Sale Price',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(
-                      color: AppThemes.primaryColorDark,
-                      width: 2.0,
-                    ),
-                  ),
-                  hintText: 'Sale Price',
-                ),
-                onSubmitted: (value) {},
-                keyboardType: TextInputType.number,
-              ),
-              SizedBox(height: 10.0),
-              Container(
-                height: 150,
-                width: 400,
-                decoration: BoxDecoration(border: Border.all(color:Colors.grey),
-                shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(8.0),),
-          child:Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-               ElevatedButton(
-                    onPressed: () {},
-                    child: Text('ADD STOCK'),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            12.0), // Set rounded corner radius
-                      ),
-                    ),
-                  ),
-              ElevatedButton(
-                    onPressed: () {},
-                    child: Text('REDUCE STOCK'),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            12.0), // Set rounded corner radius
-                      ),
-                    ),
-                  ),
-            ],
-          ),
-          ),
-
-              ),
-              SizedBox(height: 24.0),
-              Center(
-                child: SizedBox(
-                  width: 400,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    child: Text('Update'),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            12.0), // Set rounded corner radius
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
 }
-

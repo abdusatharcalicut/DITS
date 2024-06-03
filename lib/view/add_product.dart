@@ -1,7 +1,7 @@
 import 'package:dits/controller/add_product_controller.dart';
 import 'package:dits/themes/app_themes.dart';
 import 'package:flutter/material.dart';
-import 'package:dits/model/add_product_model.dart';
+import 'package:dits/model/product_model.dart';
 
 class AddProduct extends StatefulWidget {
   const AddProduct({Key? key}) : super(key: key);

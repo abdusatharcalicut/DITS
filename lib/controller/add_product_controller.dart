@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:dits/model/add_product_model.dart';
+import 'package:dits/model/product_model.dart';
 
 // Add product controller
 Future<bool> addProductToBox(BuildContext context, Product product) async {
