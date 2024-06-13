@@ -25,6 +25,8 @@ class ProductService {
 
   Future<void> updateProduct(Product product, String productId) async {
     await _productCollection.doc(productId).update(product.toMap());
+    // Navigator.pushReplacement(
+    //         context, MaterialPageRoute(builder: (context) => const HomePage()));
   }
 
   Future<void> deleteProduct(String productId) async {

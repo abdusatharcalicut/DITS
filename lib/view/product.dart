@@ -145,13 +145,13 @@ class productState extends State<product> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                "Sale price",
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight:
-                                                        FontWeight.normal),
-                                              ),
+                                              // Text(
+                                              //   "Sale price",
+                                              //   style: TextStyle(
+                                              //       fontSize: 16,
+                                              //       fontWeight:
+                                              //           FontWeight.normal),
+                                              // ),
                                               Text(
                                                 productTable['productName']
                                                     .toString(),
@@ -163,7 +163,7 @@ class productState extends State<product> {
                                                 ),
                                               ),
                                               Text(
-                                                "INR : " +
+                                                "Sale price\nINR : " +
                                                     productTable['sellingPrice']
                                                         .toString(),
                                                 style: TextStyle(fontSize: 14),
@@ -214,16 +214,16 @@ class productState extends State<product> {
                                               ),
                                             ],
                                           ),
-                                          IconButton(
-                                            icon: Icon(Icons.delete),
-                                            onPressed: () async {
-                                              await productService
-                                                  .deleteProduct(
-                                                      productTable.id);
-                                              _fetchProducts();
-                                            },
-                                            color: Colors.red,
-                                          ),
+                                          // IconButton(
+                                          //   icon: Icon(Icons.delete),
+                                          //   onPressed: () async {
+                                          //     await productService
+                                          //         .deleteProduct(
+                                          //             productTable.id);
+                                          //     _fetchProducts();
+                                          //   },
+                                          //   color: Colors.red,
+                                          // ),
                                         ],
                                       ),
                                     ),
